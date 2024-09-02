@@ -1,0 +1,46 @@
+{
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    // Set of type definitions and built-in JS APIs (libraries...)
+    "lib": ["es2023"],
+
+    // The target setting changes which JS features are downleveled and which are left intact.
+    "target": "es2023",
+
+    // Sets the module system for the program.
+    // The 'node16' and 'nodenext' modes integrate with Node's native ECMAScript Module support.
+    // The emitted JavaScript uses either CommonJS or ES2020 output depending on the file
+    // extension and the value of the type setting in the nearest package.json)
+    "module": "node16",
+
+    // Specify the module resolution strategy.
+    // 'node16' or 'nodenext' for modern versions of Node.js.
+    // Node.js v12 and later supports both ECMAScript imports and CommonJS require,
+    // which resolve using different algorithms. These moduleResolution values,
+    // when combined with the corresponding module values,
+    // picks the right algorithm for each resolution based on whether Node.js
+    // will see an import or require in the output JavaScript code.
+    "moduleResolution": "node16",
+
+    // The strict flag enables a wide range of type checking behavior that results
+    // in stronger guarantees of program correctness.
+    // Turning this on is equivalent to enabling all of the strict mode family options
+    "strict": true,
+
+    // By default (with esModuleInterop false or not set)
+    // TypeScript treats CommonJS/AMD/UMD modules similar to ES6 modules.
+    "esModuleInterop": true,
+
+    // Skip type checking of declaration files.
+    "skipLibCheck": true,
+
+    // If specified, .js (as well as .d.ts, .js.map, etc.)
+    // files will be emitted into this directory.
+    // The directory structure of the original source files is preserved
+    "outDir": "dist",
+
+    // When TypeScript compiles files, it keeps the same directory structure in
+    // the output directory as exists in the input directory.
+    "rootDir": "./src"
+  }
+}
