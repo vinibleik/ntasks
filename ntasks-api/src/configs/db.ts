@@ -9,7 +9,7 @@ class SqliteConnection {
     public db: Database.Database;
 
     private constructor() {
-        const db = new Database(join(DB_PATH, "quotes.db"));
+        const db = new Database(join(DB_PATH, "tasks.db"));
         db.pragma("foreign_keys = ON");
         db.pragma("journal_mode = WAL");
         const migration = readFileSync(join(DB_PATH, "db.sql"), "utf8");
