@@ -1,4 +1,5 @@
 import DbConnection from "../configs/db.js";
+import { RunResult } from "better-sqlite3";
 
 type Task = {
     id: number;
@@ -13,6 +14,32 @@ type TaskRow = {
     title: string;
     done: number;
 };
+
+type TaskBody = {
+    user_id: number;
+    title: string;
+};
+
+/**
+ * Strip a suffix from a string
+ * @param str - The string to strip the suffix from
+ * @param suffix - The suffix to strip
+ * */
+function stripSuffix(str: string, suffix: string): string {
+    if (str.endsWith(suffix)) {
+        return str.slice(0, -suffix.length);
+    }
+    return str;
+}
+
+function isTaskBody(obj: unknown): obj is TaskBody {
+    return (
+        typeof obj === "object" &&
+        obj !== null &&
+        typeof (obj as TaskBody).user_id === "number" &&
+        typeof (obj as TaskBody).title === "string"
+    );
+}
 
 function isTaskRow(obj: unknown): obj is TaskRow {
     return (
@@ -32,11 +59,18 @@ class TaskModel {
         this.connection = DbConnection.db;
     }
 
+    /**
+     * Get all tasks
+     * */
     public getAll(): Task[] {
         const rows = this.connection.db.prepare("SELECT * FROM tasks").all();
         return this.parseDatabaseRows(rows);
     }
 
+    /**
+     * Get a task by its id
+     * @param {number} id - The id of the task
+     * */
     public getById(id: number): Task | undefined {
         const row = this.connection.db
             .prepare("SELECT * FROM tasks WHERE id = ?")
@@ -44,6 +78,42 @@ class TaskModel {
         return this.parseDatabaseRow(row);
     }
 
+    public create(body: Record<string, string>): RunResult {
+        if (!isTaskBody(body)) {
+            return {
+                changes: 0,
+                lastInsertRowid: -1,
+            };
+        }
+        const info = this.connection.db
+            .prepare("INSERT INTO tasks(user_id, title) VALUES (?, ?)")
+            .run(body.user_id, body.title);
+        return info;
+    }
+
+    public update(id: number, body: Record<string, string>): RunResult {
+        let stmt = "UPDATE tasks SET ";
+        for (const col of ["title", "done"]) {
+            if (body[col]) {
+                stmt += `${col} = ${body[col]}, `;
+            }
+        }
+        stmt = stripSuffix(stmt, ", ");
+        stmt += " WHERE id = ?";
+        const info = this.connection.db.prepare(stmt).run(id);
+        return info;
+    }
+
+    public delete(id: number): RunResult {
+        return this.connection.db
+            .prepare("DELETE FROM tasks WHERE id = ?")
+            .run(id);
+    }
+
+    /**
+     * Parse a database row to a task object. If the row is invalid, return undefined
+     * @param row - The row returned from the database operation
+     * */
     public parseDatabaseRow(row: unknown): Task | undefined {
         if (!isTaskRow(row)) {
             return undefined;
@@ -54,6 +124,10 @@ class TaskModel {
         } as Task;
     }
 
+    /**
+     * Parse an array of database rows to an array of task objects
+     * @param rows - The rows returned from the database operation
+     * */
     public parseDatabaseRows(rows: unknown[]): Task[] {
         return rows
             .map(this.parseDatabaseRow)

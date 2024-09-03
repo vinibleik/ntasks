@@ -5,4 +5,15 @@ const taskRouter = Router();
 
 taskRouter.get("/tasks", TasksController.getTasks);
 
+taskRouter
+    .route("/")
+    .get(TasksController.getTasks)
+    .post(TasksController.createTask);
+
+taskRouter
+    .route("/:id")
+    .get(TasksController.getTask)
+    .put(TasksController.updateTask)
+    .delete(TasksController.deleteTask);
+
 export default taskRouter;

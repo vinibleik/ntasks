@@ -1,0 +1,3 @@
+- Users Model methods
+- Users Controller
+- Users Routes
