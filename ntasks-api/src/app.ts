@@ -1,5 +1,6 @@
 import express from "express";
 import TasksRouter from "./routes/tasksRoutes.js";
+import UserRouter from "./routes/usersRoutes.js";
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.get("/", (_req, res) => {
     res.json({ status: "NTask API" });
 });
 
-app.use("/", TasksRouter);
+app.use("/api/v1/tasks", TasksRouter);
+app.use("/api/v1/users", UserRouter);
 
 export default app;
