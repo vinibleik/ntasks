@@ -3,8 +3,6 @@ import TasksController from "../controllers/tasksController.js";
 
 const taskRouter = Router();
 
-taskRouter.get("/tasks", TasksController.getTasks);
-
 taskRouter
     .route("/")
     .get(TasksController.getTasks)
