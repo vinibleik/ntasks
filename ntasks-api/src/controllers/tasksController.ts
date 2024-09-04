@@ -59,7 +59,7 @@ const updateTask: RequestHandler = (req, res) => {
 const deleteTask: RequestHandler = (req, res) => {
     try {
         Tasks.delete(+req.params.id);
-        return res.status(204);
+        return res.status(204).end();
     } catch (e) {
         return res.status(500).json(handleError(e));
     }
