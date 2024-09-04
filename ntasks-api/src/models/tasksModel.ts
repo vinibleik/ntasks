@@ -1,5 +1,4 @@
 import DbConnection from "../configs/db.js";
-import { RunResult } from "better-sqlite3";
 
 type Task = {
     id: number;
@@ -60,7 +59,7 @@ class TaskModel {
     }
 
     /**
-     * Get all tasks
+     * Get all tasks. If there's no tasks the array will be length 0.
      * */
     public getAll(): Task[] {
         const rows = this.connection.db.prepare("SELECT * FROM tasks").all();
@@ -68,8 +67,9 @@ class TaskModel {
     }
 
     /**
-     * Get a task by its id
+     * Get a task by its id. If there's no such task undefined is returned.
      * @param {number} id - The id of the task
+     * @returns {Task | undefined} - The task or undefined if there's no such task
      * */
     public getById(id: number): Task | undefined {
         const row = this.connection.db
@@ -78,20 +78,33 @@ class TaskModel {
         return this.parseDatabaseRow(row);
     }
 
-    public create(body: Record<string, string>): RunResult {
+    /**
+     * Create a task. If the body is invalid, return undefined
+     * @param {Record<string, string>} body - The body of the task
+     * @returns {Task | undefined} - The created task or undefined if the body is invalid
+     * */
+    public create(body: Record<string, string>): Task | undefined {
         if (!isTaskBody(body)) {
-            return {
-                changes: 0,
-                lastInsertRowid: -1,
-            };
+            return undefined;
         }
         const info = this.connection.db
             .prepare("INSERT INTO tasks(user_id, title) VALUES (?, ?)")
             .run(body.user_id, body.title);
-        return info;
+        return {
+            id: Number(info.lastInsertRowid),
+            user_id: body.user_id,
+            title: body.title,
+            done: false,
+        };
     }
 
-    public update(id: number, body: Record<string, string>): RunResult {
+    /**
+     * Update a task. If the body is invalid, return undefined
+     * @param {number} id - The id of the task
+     * @param {Record<string, string>} body - The body of the task
+     * @returns {Task | undefined} - The updated task or undefined if the body is invalid
+     * */
+    public update(id: number, body: Record<string, string>): Task | undefined {
         let stmt = "UPDATE tasks SET ";
         for (const col of ["title", "done"]) {
             if (body[col]) {
@@ -100,14 +113,16 @@ class TaskModel {
         }
         stmt = stripSuffix(stmt, ", ");
         stmt += " WHERE id = ?";
-        const info = this.connection.db.prepare(stmt).run(id);
-        return info;
+        this.connection.db.prepare(stmt).run(id);
+        return this.getById(id);
     }
 
-    public delete(id: number): RunResult {
-        return this.connection.db
-            .prepare("DELETE FROM tasks WHERE id = ?")
-            .run(id);
+    /**
+     * Delete a task by its id
+     * @param {number} id - The id of the task
+     * */
+    public delete(id: number): void {
+        this.connection.db.prepare("DELETE FROM tasks WHERE id = ?").run(id);
     }
 
     /**
