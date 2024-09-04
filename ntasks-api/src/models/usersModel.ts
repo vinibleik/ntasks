@@ -38,9 +38,9 @@ class UserModel {
      * */
     public getById(id: number): User | undefined {
         const row = this.connection.db
-            .prepare("SELECT id, name, email  FROM users WHERE id = ?")
+            .prepare("SELECT id, name, email FROM users WHERE id = ?")
             .get(id);
-        return isUser(row) ? row : undefined;
+        return row as User | undefined;
     }
 
     /**
