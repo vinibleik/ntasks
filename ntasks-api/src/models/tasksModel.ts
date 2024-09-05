@@ -19,6 +19,11 @@ type TaskBody = {
     title: string;
 };
 
+type TaskUpdateBody = {
+    title?: string;
+    done?: boolean;
+};
+
 /**
  * Strip a suffix from a string
  * @param str - The string to strip the suffix from
@@ -48,6 +53,15 @@ function isTaskRow(obj: unknown): obj is TaskRow {
         typeof (obj as TaskRow).user_id === "number" &&
         typeof (obj as TaskRow).title === "string" &&
         typeof (obj as TaskRow).done === "number"
+    );
+}
+
+function isTaskUpdateBody(obj: unknown): obj is TaskUpdateBody {
+    return (
+        typeof obj === "object" &&
+        obj !== null &&
+        (typeof (obj as TaskUpdateBody).title === "string" ||
+            typeof (obj as TaskUpdateBody).done === "boolean")
     );
 }
 
@@ -105,13 +119,21 @@ class TaskModel {
      * @returns {Task | undefined} - The updated task or undefined if the body is invalid
      * */
     public update(id: number, body: Record<string, string>): Task | undefined {
+        if (!isTaskUpdateBody(body)) {
+            return undefined;
+        }
         let stmt = "UPDATE tasks SET ";
         for (const col of ["title", "done"]) {
-            if (body[col]) {
-                stmt += `${col} = ${body[col]}, `;
+            let value = body[col];
+            if (body[col] !== undefined) {
+                if (col === "done") {
+                    stmt += `${col} = ${value ? 1 : 0}, `;
+                } else {
+                    stmt += `${col} = '${value}', `;
+                }
             }
         }
-        stmt = stripSuffix(stmt, ", ");
+        stmt = stripSuffix(stmt, ", ").trimEnd();
         stmt += " WHERE id = ?";
         this.connection.db.prepare(stmt).run(id);
         return this.getById(id);

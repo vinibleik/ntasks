@@ -43,6 +43,12 @@ const getTask: RequestHandler = (req, res) => {
 
 const updateTask: RequestHandler = (req, res) => {
     try {
+        if (!req.body.title && !req.body.done) {
+            return res.status(400).json({
+                error: "Bad Request",
+                message: "Body to update Task is invalid.",
+            });
+        }
         const task = Tasks.update(+req.params.id, req.body);
         if (!task) {
             return res.status(404).json({
