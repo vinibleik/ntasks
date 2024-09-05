@@ -2,3 +2,6 @@ dist
 node_modules
 db/*
 !db/db.sql
+**/*.mjs
+**/*.cjs
+**/*.js

@@ -1,4 +1,5 @@
 import DbConnection from "../configs/db.js";
+import bcrypt from "bcrypt";
 
 type UserBody = {
     name: string;
@@ -31,6 +32,10 @@ class UserModel {
         this.connection = DbConnection.db;
     }
 
+    static checkPassword(user: User, password: string): boolean {
+        return bcrypt.compareSync(password, user.password);
+    }
+
     /**
      * Get user by id
      * @param id - The id of the user
@@ -53,11 +58,13 @@ class UserModel {
             return undefined;
         }
 
+        const password = bcrypt.hashSync(user.password, 12);
+
         const info = this.connection.db
             .prepare(
                 "INSERT INTO users(name, password, email) VALUES (?, ?, ?)",
             )
-            .run(user.name, user.password, user.email);
+            .run(user.name, password, user.email);
         return this.getById(Number(info.lastInsertRowid));
     }
 
