@@ -21,10 +21,6 @@ function isUserBody(obj: unknown): obj is UserBody {
     );
 }
 
-function isUser(obj: unknown): obj is User {
-    return isUserBody(obj) && typeof (obj as User).id === "number";
-}
-
 class UserModel {
     private connection;
 

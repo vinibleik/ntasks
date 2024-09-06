@@ -1,8 +1,7 @@
 import { RequestHandler } from "express";
 import Users from "../models/usersModel.js";
 import jwt from "jsonwebtoken";
-
-const secret = "secret";
+import config from "../configs/config.js";
 
 const signIn: RequestHandler = (req, res) => {
     if (!req.body.email || !req.body.password) {
@@ -19,7 +18,7 @@ const signIn: RequestHandler = (req, res) => {
         return res.status(401).end();
     }
 
-    const token = jwt.sign({ id: user.id }, secret);
+    const token = jwt.sign({ id: user.id }, config.JWT_SECRET);
 
     return res.status(200).json({ token });
 };
@@ -38,7 +37,7 @@ const isLogged: RequestHandler = (req, res, next) => {
     }
 
     try {
-        const payload = jwt.verify(token, secret) as { id: number };
+        const payload = jwt.verify(token, config.JWT_SECRET) as { id: number };
         const user = Users.getById(payload.id);
         if (!user) {
             return res.status(401).end();
