@@ -1,7 +1,10 @@
 import { Router } from "express";
 import TasksController from "../controllers/tasksController.js";
+import AuthController from "../controllers/authController.js";
 
 const taskRouter = Router();
+
+taskRouter.use(AuthController.isLogged);
 
 taskRouter
     .route("/")

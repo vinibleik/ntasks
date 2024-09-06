@@ -28,29 +28,26 @@ const isLogged: RequestHandler = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        console.log("No header or mal formed");
-        return res.status(401);
+        return res.status(401).end();
     }
 
     const token = authHeader.split(" ")[1];
 
     if (!token) {
-        console.log("no token in header");
-        return res.status(401);
+        return res.status(401).end();
     }
 
     try {
         const payload = jwt.verify(token, secret) as { id: number };
         const user = Users.getById(payload.id);
         if (!user) {
-            console.log("No user with id: ", payload.id);
-            return res.status(401);
+            return res.status(401).end();
         }
         res.locals.user = user;
         next();
     } catch (e) {
         console.error(e);
-        return res.status(401);
+        return res.status(401).end();
     }
 };
 

@@ -4,7 +4,7 @@ import { handleError } from "../helpers/errorHandler.js";
 
 const getUser: RequestHandler = (req, res) => {
     try {
-        const user = Users.getById(+req.params.id);
+        const user = Users.getById(res.locals.user.id);
         if (!user) {
             return res.status(404).json({
                 error: "Not Found",
@@ -35,9 +35,9 @@ const createUser: RequestHandler = (req, res) => {
     }
 };
 
-const deleteUser: RequestHandler = (req, res) => {
+const deleteUser: RequestHandler = (_req, res) => {
     try {
-        Users.delete(+req.params.id);
+        Users.delete(res.locals.user.id);
         return res.status(204).end();
     } catch (e) {
         return res.status(500).json(handleError(e));

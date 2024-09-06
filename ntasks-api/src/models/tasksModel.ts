@@ -80,15 +80,22 @@ class TaskModel {
         return this.parseDatabaseRows(rows);
     }
 
+    public getAllById(id: number): Task[] {
+        const rows = this.connection.db
+            .prepare("SELECT * FROM tasks WHERE user_id = ?")
+            .all(id);
+        return this.parseDatabaseRows(rows);
+    }
+
     /**
      * Get a task by its id. If there's no such task undefined is returned.
      * @param {number} id - The id of the task
      * @returns {Task | undefined} - The task or undefined if there's no such task
      * */
-    public getById(id: number): Task | undefined {
+    public getById(id: number, user_id: number): Task | undefined {
         const row = this.connection.db
-            .prepare("SELECT * FROM tasks WHERE id = ?")
-            .get(id);
+            .prepare("SELECT * FROM tasks WHERE id = ? AND user_id = ?")
+            .get(id, user_id);
         return this.parseDatabaseRow(row);
     }
 
@@ -118,7 +125,11 @@ class TaskModel {
      * @param {Record<string, string>} body - The body of the task
      * @returns {Task | undefined} - The updated task or undefined if the body is invalid
      * */
-    public update(id: number, body: Record<string, string>): Task | undefined {
+    public update(
+        id: number,
+        user_id: number,
+        body: Record<string, string>,
+    ): Task | undefined {
         if (!isTaskUpdateBody(body)) {
             return undefined;
         }
@@ -134,17 +145,19 @@ class TaskModel {
             }
         }
         stmt = stripSuffix(stmt, ", ").trimEnd();
-        stmt += " WHERE id = ?";
-        this.connection.db.prepare(stmt).run(id);
-        return this.getById(id);
+        stmt += " WHERE id = ? AND user_id = ?";
+        this.connection.db.prepare(stmt).run(id, user_id);
+        return this.getById(id, user_id);
     }
 
     /**
      * Delete a task by its id
      * @param {number} id - The id of the task
      * */
-    public delete(id: number): void {
-        this.connection.db.prepare("DELETE FROM tasks WHERE id = ?").run(id);
+    public delete(id: number, user_id: number): void {
+        this.connection.db
+            .prepare("DELETE FROM tasks WHERE id = ? AND user_id = ?")
+            .run(id, user_id);
     }
 
     /**

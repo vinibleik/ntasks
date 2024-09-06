@@ -4,7 +4,8 @@ import { handleError } from "../helpers/errorHandler.js";
 
 const getTasks: RequestHandler = (_req, res) => {
     try {
-        const tasks = Tasks.getAll();
+        const { id } = res.locals.user;
+        const tasks = Tasks.getAllById(id as number);
         return res.status(200).json({ tasks });
     } catch (e) {
         return res.status(500).json(handleError(e));
@@ -13,6 +14,8 @@ const getTasks: RequestHandler = (_req, res) => {
 
 const createTask: RequestHandler = (req, res) => {
     try {
+        const { id } = res.locals.user;
+        req.body.user_id = id as number;
         const task = Tasks.create(req.body);
         if (!task) {
             return res.status(400).json({
@@ -28,7 +31,7 @@ const createTask: RequestHandler = (req, res) => {
 
 const getTask: RequestHandler = (req, res) => {
     try {
-        const task = Tasks.getById(+req.params.id);
+        const task = Tasks.getById(+req.params.id, res.locals.user.id);
         if (!task) {
             return res.status(404).json({
                 error: "Not Found",
@@ -49,7 +52,7 @@ const updateTask: RequestHandler = (req, res) => {
                 message: "Body to update Task is invalid.",
             });
         }
-        const task = Tasks.update(+req.params.id, req.body);
+        const task = Tasks.update(+req.params.id, res.locals.user.id, req.body);
         if (!task) {
             return res.status(404).json({
                 error: "Not Found",
@@ -64,7 +67,7 @@ const updateTask: RequestHandler = (req, res) => {
 
 const deleteTask: RequestHandler = (req, res) => {
     try {
-        Tasks.delete(+req.params.id);
+        Tasks.delete(+req.params.id, res.locals.user.id);
         return res.status(204).end();
     } catch (e) {
         return res.status(500).json(handleError(e));
