@@ -32,7 +32,7 @@ class UserModel {
         this.connection = DbConnection.db;
     }
 
-    static checkPassword(user: User, password: string): boolean {
+    public checkPassword(user: User, password: string): boolean {
         return bcrypt.compareSync(password, user.password);
     }
 
@@ -45,6 +45,15 @@ class UserModel {
         const row = this.connection.db
             .prepare("SELECT id, name, email FROM users WHERE id = ?")
             .get(id);
+        return row as User | undefined;
+    }
+
+    public getByEmail(email: string): User | undefined {
+        const row = this.connection.db
+            .prepare(
+                "SELECT id, name, email, password FROM users WHERE email = ?",
+            )
+            .get(email);
         return row as User | undefined;
     }
 
