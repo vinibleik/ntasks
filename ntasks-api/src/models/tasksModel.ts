@@ -1,6 +1,6 @@
 import DbConnection from "../configs/db.js";
 
-type Task = {
+export type Task = {
     id: number;
     user_id: number;
     title: string;
@@ -66,7 +66,7 @@ function isTaskUpdateBody(obj: unknown): obj is TaskUpdateBody {
 }
 
 class TaskModel {
-    private connection;
+    public connection: DbConnection;
 
     constructor() {
         this.connection = DbConnection.db;

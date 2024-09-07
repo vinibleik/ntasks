@@ -22,7 +22,7 @@ function isUserBody(obj: unknown): obj is UserBody {
 }
 
 class UserModel {
-    private connection;
+    public connection: DbConnection;
 
     constructor() {
         this.connection = DbConnection.db;
