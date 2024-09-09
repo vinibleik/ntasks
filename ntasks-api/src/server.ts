@@ -7,12 +7,16 @@ import https from "node:https";
 const PORT = config.PORT;
 const CERT_DIR = path.resolve(path.join(__dirname, "../certificates/"));
 
-if (config.NODE_ENV !== "test") {
+if (config.NODE_ENV === "production") {
     const options = {
         key: fs.readFileSync(path.join(CERT_DIR, "ntask.key"), "utf8"),
         cert: fs.readFileSync(path.join(CERT_DIR, "ntask.crt"), "utf8"),
     };
     https.createServer(options, App).listen(PORT, () => {
+        console.log(`Ntasks API - PORT ${PORT}`);
+    });
+} else {
+    App.listen(PORT, () => {
         console.log(`Ntasks API - PORT ${PORT}`);
     });
 }
